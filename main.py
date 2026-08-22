@@ -78,61 +78,6 @@ def health():
             "csv": CSV_PATH.exists()}
 
 
-@app.get("/debug/versions")
-def debug_versions():
-    """Endpoint temporal de diagnóstico: versiones instaladas y rutas registradas."""
-    import importlib
-    info = {}
-    for pkg in ["fastapi", "starlette", "gradio", "gradio_client", "pydantic", "uvicorn"]:
-        try:
-            mod = importlib.import_module(pkg)
-            info[pkg] = getattr(mod, "__version__", "unknown")
-        except Exception as e:
-            info[pkg] = f"ERROR: {e}"
-    try:
-        import evidently
-        info["evidently"] = getattr(evidently, "__version__", "present (sin __version__)")
-    except Exception as e:
-        info["evidently"] = f"no instalado ({type(e).__name__}: {e})"
-    try:
-        import multipart
-        info["multipart_file"] = getattr(multipart, "__file__", "?")
-        info["multipart_has_submodule"] = hasattr(multipart, "multipart")
-    except Exception as e:
-        info["multipart_file"] = f"ERROR: {type(e).__name__}: {e}"
-    routes = []
-    for r in app.routes:
-        routes.append({
-            "path": getattr(r, "path", str(r)),
-            "name": getattr(r, "name", None),
-            "type": type(r).__name__,
-        })
-    info["routes"] = routes
-    return info
-
-
-@app.get("/debug/selftest")
-def debug_selftest():
-    """Llama a /ui/ dentro del propio proceso (sin red/proxy de por medio)."""
-    from starlette.testclient import TestClient
-    import os as _os
-    result = {}
-    try:
-        with TestClient(app) as client:
-            r = client.get("/ui/")
-            result["internal_ui_status"] = r.status_code
-            result["internal_ui_body_head"] = r.text[:200]
-    except Exception as e:
-        result["internal_ui_error"] = f"{type(e).__name__}: {e}"
-    result["env_HOME"] = _os.environ.get("HOME")
-    result["env_PORT"] = _os.environ.get("PORT")
-    result["env_GRADIO_ROOT_PATH"] = _os.environ.get("GRADIO_ROOT_PATH")
-    result["env_WEB_CONCURRENCY"] = _os.environ.get("WEB_CONCURRENCY")
-    result["cwd"] = _os.getcwd()
-    result["whoami_uid"] = _os.getuid()
-    return result
-
-
 @app.post("/predict")
 def predict(temperatura: float, vibracion: float):
     X = pd.DataFrame([[temperatura, vibracion]],
