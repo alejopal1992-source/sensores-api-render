@@ -78,6 +78,39 @@ def health():
             "csv": CSV_PATH.exists()}
 
 
+@app.get("/debug/versions")
+def debug_versions():
+    """Endpoint temporal de diagnóstico: versiones instaladas y rutas registradas."""
+    import importlib
+    info = {}
+    for pkg in ["fastapi", "starlette", "gradio", "gradio_client", "pydantic", "uvicorn"]:
+        try:
+            mod = importlib.import_module(pkg)
+            info[pkg] = getattr(mod, "__version__", "unknown")
+        except Exception as e:
+            info[pkg] = f"ERROR: {e}"
+    try:
+        import evidently
+        info["evidently"] = getattr(evidently, "__version__", "present (sin __version__)")
+    except Exception as e:
+        info["evidently"] = f"no instalado ({type(e).__name__}: {e})"
+    try:
+        import multipart
+        info["multipart_file"] = getattr(multipart, "__file__", "?")
+        info["multipart_has_submodule"] = hasattr(multipart, "multipart")
+    except Exception as e:
+        info["multipart_file"] = f"ERROR: {type(e).__name__}: {e}"
+    routes = []
+    for r in app.routes:
+        routes.append({
+            "path": getattr(r, "path", str(r)),
+            "name": getattr(r, "name", None),
+            "type": type(r).__name__,
+        })
+    info["routes"] = routes
+    return info
+
+
 @app.post("/predict")
 def predict(temperatura: float, vibracion: float):
     X = pd.DataFrame([[temperatura, vibracion]],
