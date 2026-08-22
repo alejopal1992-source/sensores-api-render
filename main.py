@@ -111,6 +111,28 @@ def debug_versions():
     return info
 
 
+@app.get("/debug/selftest")
+def debug_selftest():
+    """Llama a /ui/ dentro del propio proceso (sin red/proxy de por medio)."""
+    from starlette.testclient import TestClient
+    import os as _os
+    result = {}
+    try:
+        with TestClient(app) as client:
+            r = client.get("/ui/")
+            result["internal_ui_status"] = r.status_code
+            result["internal_ui_body_head"] = r.text[:200]
+    except Exception as e:
+        result["internal_ui_error"] = f"{type(e).__name__}: {e}"
+    result["env_HOME"] = _os.environ.get("HOME")
+    result["env_PORT"] = _os.environ.get("PORT")
+    result["env_GRADIO_ROOT_PATH"] = _os.environ.get("GRADIO_ROOT_PATH")
+    result["env_WEB_CONCURRENCY"] = _os.environ.get("WEB_CONCURRENCY")
+    result["cwd"] = _os.getcwd()
+    result["whoami_uid"] = _os.getuid()
+    return result
+
+
 @app.post("/predict")
 def predict(temperatura: float, vibracion: float):
     X = pd.DataFrame([[temperatura, vibracion]],
