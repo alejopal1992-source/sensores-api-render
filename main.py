@@ -220,10 +220,14 @@ with gr.Blocks(title="Predicción de Fallas Industriales") as dashboard:
             resultado = gr.Textbox(label="Resultado")
             grafico = gr.Plot(label="Probabilidad de falla")
 
+    # queue=False: evita el sistema de colas de Gradio (usa WebSocket) que
+    # falla detrás del proxy de Render ("This application is currently busy").
+    # Con queue=False cada clic es una petición HTTP normal, sin WebSocket.
     btn.click(predecir_ui, inputs=[temperatura_in, vibracion_in],
-              outputs=[resultado, grafico])
+              outputs=[resultado, grafico], queue=False)
 
-# Si Gradio corre detrás de un proxy (p.ej. Render), permite fijar el
-# root_path público con la variable de entorno GRADIO_ROOT_PATH.
+# IMPORTANTE: no configures la variable de entorno GRADIO_ROOT_PATH en Render
+# con la URL completa (https://...) — rompe el enrutado de Gradio. Déjala sin
+# definir; root_path="" (el valor por defecto aquí) funciona correctamente.
 gr.mount_gradio_app(app, dashboard, path="/ui",
                      root_path=os.environ.get("GRADIO_ROOT_PATH", ""))
