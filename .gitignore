@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Artefactos pesados (se regeneran con train_model.py / src/generar_datos.py)
+# Descomenta si no quieres versionarlos en GitHub:
+# data/*.csv
+# models/*.pkl
+# reports/*.html

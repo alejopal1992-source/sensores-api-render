@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+joblib
+fastapi
+uvicorn[standard]
+pydantic
+gradio
+plotly
+requests
+evidently

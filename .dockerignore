@@ -1,0 +1,29 @@
+# Entornos virtuales / cachés locales
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Control de versiones
+.git/
+.gitignore
+
+# Artefactos locales (se regeneran en el build con train_model.py)
+data/*
+models/*
+reports/*
+!data/.gitkeep
+!models/.gitkeep
+!reports/.gitkeep
+
+# Código y datos de la Semana 2 (no se usan en la imagen de Docker)
+src/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+
+# Docs
+README.md
