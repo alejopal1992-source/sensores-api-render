@@ -8,12 +8,15 @@ Endpoints:
   POST /predict  -> predicción individual (temperatura, vibración)
   POST /monitor  -> detección de drift simple (regla ±k·sigma)
   GET  /ui       -> dashboard interactivo (Gradio)
+  GET  /panel    -> valor agregado: interfaz web propia (HTML/CSS/JS puro)
   GET  /docs     -> documentación Swagger automática
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pathlib import Path
 import os, joblib, numpy as np, pandas as pd
+from panel_html import PANEL_HTML
 
 # ---- Rutas base y archivos ----
 BASE_DIR    = Path(__file__).resolve().parent
@@ -76,6 +79,13 @@ app.add_middleware(
 def health():
     return {"status": "ok", "model": MODEL_PATH.name,
             "csv": CSV_PATH.exists()}
+
+
+@app.get("/panel", response_class=HTMLResponse, include_in_schema=False)
+def panel():
+    """Valor agregado: interfaz web propia (HTML/CSS/JS puro) que consume
+    /predict directamente, como alternativa liviana al dashboard Gradio."""
+    return HTMLResponse(PANEL_HTML)
 
 
 @app.post("/predict")
